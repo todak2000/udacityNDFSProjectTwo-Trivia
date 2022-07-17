@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import $ from 'jquery';
 import '../stylesheets/QuizView.css';
+import { url } from '../util/api';
 
-const questionsPerPlay = 5;
+let questionsPerPlay;
 
 class QuizView extends Component {
   constructor(props) {
@@ -10,6 +11,7 @@ class QuizView extends Component {
     this.state = {
       quizCategory: null,
       previousQuestions: [],
+      questionCount: 1,
       showAnswer: false,
       categories: {},
       numCorrect: 0,
@@ -21,7 +23,7 @@ class QuizView extends Component {
 
   componentDidMount() {
     $.ajax({
-      url: `/categories`, //TODO: update request URL
+      url: `${url}/categories`, //TODO: update request URL
       type: 'GET',
       success: (result) => {
         this.setState({ categories: result.categories });
@@ -47,9 +49,9 @@ class QuizView extends Component {
     if (this.state.currentQuestion.id) {
       previousQuestions.push(this.state.currentQuestion.id);
     }
-
+    
     $.ajax({
-      url: '/quizzes', //TODO: update request URL
+      url: url+'/quizzes', //TODO: update request URL
       type: 'POST',
       dataType: 'json',
       contentType: 'application/json',
@@ -58,7 +60,7 @@ class QuizView extends Component {
         quiz_category: this.state.quizCategory,
       }),
       xhrFields: {
-        withCredentials: true,
+        withCredentials: false,
       },
       crossDomain: true,
       success: (result) => {
@@ -69,13 +71,21 @@ class QuizView extends Component {
           guess: '',
           forceEnd: result.question ? false : true,
         });
+        if (result.question_count < 10){ 
+          questionsPerPlay= result.question_count - 1
+        }
+        else{
+          questionsPerPlay= 10
+        }
         return;
       },
       error: (error) => {
+        console.log(error, "error")
         alert('Unable to load question. Please try your request again');
-        return;
+        
       },
     });
+  
   };
 
   submitGuess = (event) => {
@@ -85,6 +95,8 @@ class QuizView extends Component {
       numCorrect: !evaluate ? this.state.numCorrect : this.state.numCorrect + 1,
       showAnswer: true,
     });
+    
+
   };
 
   restartGame = () => {

@@ -1,0 +1,15 @@
+intiate virtual env
+source  ~/.trivia/bin/activate
+
+export FLASK_APP=flaskr
+export FLASK_ENV=development
+flask run
+
+
+to run test use:
+    python3 test_flaskr.py
+
+setup new test database run:
+    dropdb trivia_test
+    createdb trivia_test
+    psql trivia_test < trivia.psql
